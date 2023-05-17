@@ -30,4 +30,6 @@ add_executable(m3u8 main.cpp
         serialize/serialize.h
         data/VideoCacheInfo.cpp
         data/VideoCacheInfo.h
-        md5/md5.h)
+        md5/md5.h
+        downloader/FileDownload.cpp
+        downloader/FileDownload.h)

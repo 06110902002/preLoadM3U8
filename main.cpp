@@ -6,6 +6,7 @@
 #include "md5/md5.h"
 #include "openssl/md5.h"
 #include <curl/curl.h>
+#include "downloader/FileDownload.h"
 
 using namespace std;
 
@@ -78,6 +79,103 @@ CURLcode dl_curl_get_req(const std::string &url, std::string filename)
     return res;
 }
 
+
+size_t header_callback(void *buffer, size_t size, size_t nitems, void *userdata)
+{
+    string sHeaderData = (char*)buffer;
+    string sKey = "Content-Disposition";
+    std::size_t nFound = sHeaderData.find(sKey);
+    if (nFound != std::string::npos)
+    {
+        printf("Header data: %s \n", (char*)buffer);
+        stringstream ss(sHeaderData);
+        char cSplit = ';'; // 设定好分隔符号
+        sKey = "filename=";
+        vector<string> results; // 用来存储结果
+        string strResult;
+        while (getline(ss, strResult, cSplit))
+        {
+            nFound = strResult.find(sKey);
+            if (nFound != std::string::npos)
+            {
+                string sFileName = strResult.substr(nFound + sKey.length());
+                sKey = '"';
+                nFound = sFileName.find(sKey);
+                if (nFound != std::string::npos)
+                {
+                    sFileName = sFileName.substr(1, sFileName.length()-2);
+                }
+                //m_sFileName = sFileName;
+                printf("sFileName: %s \n", sFileName.c_str());
+                break;
+            }
+        }
+    }
+
+    return nitems * size;
+}
+
+double getDownloadFileInfo(const string url)
+{
+    CURL *easy_handle = NULL;
+    int ret = CURLE_OK;
+    double size = -1;
+
+    do
+    {
+        easy_handle = curl_easy_init();
+        if (!easy_handle)
+        {
+            printf("curl_easy_init error\n");
+            break;
+        }
+
+        // Only get the header data
+        curl_easy_setopt(easy_handle, CURLOPT_URL, url.c_str());
+        curl_easy_setopt(easy_handle, CURLOPT_CUSTOMREQUEST, "GET");    //使用CURLOPT_CUSTOMREQUEST
+        //ret |= curl_easy_setopt(easy_handle, CURLOPT_HEADER, 1L);
+        curl_easy_setopt(easy_handle, CURLOPT_NOBODY, 1L);
+        //ret |= curl_easy_setopt(easy_handle, CURLOPT_WRITEFUNCTION, nousecb);
+
+        curl_easy_setopt(easy_handle, CURLOPT_HEADERFUNCTION, header_callback);
+
+        ret = curl_easy_perform(easy_handle);
+        if (ret != CURLE_OK)
+        {
+            char s[100] = {0};
+            //sprintf(s, sizeof(s), "error:%d:%s", ret, curl_easy_strerror(static_cast<CURLcode>(ret)));
+
+            //ZLOG(s);
+            break;
+        }
+
+        // size = -1 if no Content-Length return or Content-Length=0
+        ret = curl_easy_getinfo(easy_handle, CURLINFO_CONTENT_LENGTH_DOWNLOAD, &size);
+
+        if (ret != CURLE_OK)
+        {
+            printf("curl_easy_getinfo error\n");
+            break;
+        }
+
+    } while (0);
+
+    curl_easy_cleanup(easy_handle);
+
+    if (size > 0.0)
+    {
+        //downloadFileLength = size;
+    }
+
+    return size;
+}
+
+
+
+void progress_listener (void *userdata, double downloadSpeed,double remainingTime,double progressPercentage) {
+
+    printf("177-----downloadSpeed = %f,  remainingTime = %f s  progressPercentage = %f \n", downloadSpeed, remainingTime,progressPercentage);
+}
 
 
 
@@ -158,10 +256,16 @@ int main() {
 
 
     char* dl_get_url = "http://devimages.apple.com.edgekey.net/streaming/examples/bipbop_4x3/gear1/prog_index.m3u8";
-    string filename ="../test.m3u8";
-    dl_curl_get_req(dl_get_url, filename);
+//    string filename ="../test.m3u8";
+//    dl_curl_get_req(dl_get_url, filename);
+//
+//    printf("155-------- 下载完成\n");
 
-    printf("155-------- 下载完成\n");
+    //getDownloadFileInfo(dl_get_url);
+
+    char* mp4 = "https://static-dev.nio.com/dc-operation/2022/11/16/g5sX1zY2BcfjORwH.mp4";
+    FileDownload* fileDownload = new FileDownload();
+    fileDownload->downLoad(mp4,"../test.mp4", nullptr, progress_listener);
 
     return 0;
 }
