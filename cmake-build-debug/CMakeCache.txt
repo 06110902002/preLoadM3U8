@@ -213,6 +213,15 @@ m3u8_IS_TOP_LEVEL:STATIC=ON
 //Value Computed by CMake
 m3u8_SOURCE_DIR:STATIC=/Users/rambo.liu/Documents/Demo/CPP_DEMO/m3u8
 
+//Value Computed by CMake
+preload_BINARY_DIR:STATIC=/Users/rambo.liu/Documents/Demo/CPP_DEMO/m3u8/cmake-build-debug
+
+//Value Computed by CMake
+preload_IS_TOP_LEVEL:STATIC=ON
+
+//Value Computed by CMake
+preload_SOURCE_DIR:STATIC=/Users/rambo.liu/Documents/Demo/CPP_DEMO/m3u8
+
 
 ########################
 # INTERNAL cache entries

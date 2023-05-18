@@ -6,7 +6,10 @@
 #include "md5/md5.h"
 #include "openssl/md5.h"
 #include <curl/curl.h>
+#include <unistd.h>
 #include "downloader/FileDownload.h"
+#include "queue/SafeQueue.h"
+#include "threadpool/ThreadPool.h"
 
 using namespace std;
 
@@ -170,47 +173,7 @@ double getDownloadFileInfo(const string url)
     return size;
 }
 
-
-
-void progress_listener (void *userdata, double downloadSpeed,double remainingTime,double progressPercentage) {
-
-    printf("177-----downloadSpeed = %f,  remainingTime = %f s  progressPercentage = %f \n", downloadSpeed, remainingTime,progressPercentage);
-}
-
-
-
-
-int main() {
-
-
-    const char *filePath = "../prog_index.m3u8";
-//    ifstream file;
-//    file.open(filePath,ios::in);
-//    if(!file.is_open()) {
-//        printf("190-----文件打开失败\n");
-//        return 0;
-//    }
-//    string strLine;
-//    while(getline(file,strLine)){
-//        if(strLine.empty()) {
-//            break;
-//        }
-//
-//        printf("197----- str = %s\n",strLine.c_str());
-//    }
-
-//    M3U8* m3U8 = new M3U8();
-//
-//    M3U8Parse* m3U8Parse = new M3U8Parse();
-//    m3U8Parse->parse(*filePath,&m3U8);
-//
-//    const char *local_m3u8_file = "../local.m3u8";
-//    m3U8Parse->createLocalM3U8File(local_m3u8_file,*m3U8);
-//    delete m3U8;
-//    char buf[9];
-//    sprintf(buf, "%f", 9.976670);//这句是将浮点数转换为字符串
-//    printf("parse done = %s  sizeof (char*) = %lu\n",buf,sizeof (local_m3u8_file));
-
+void test_serialize() {
     //序列化 测试
     VideoCacheInfo videoCacheInfo;
     videoCacheInfo.mVideoUrl = "http://";
@@ -242,7 +205,111 @@ int main() {
     InStream is(serializestr);
     is >> videoCacheInfo2;
 
-    printf("61-----mvideo = %s:\n",videoCacheInfo2.mVideoUrl.c_str());
+    //printf("61-----mvideo = %s:\n",videoCacheInfo2.mVideoUrl.c_str());
+}
+
+
+
+void progress_listener (void *userdata, double downloadSpeed,double remainingTime,double progressPercentage) {
+
+    printf("177-----downloadSpeed = %f,  remainingTime = %f s  progressPercentage = %f \n", downloadSpeed, remainingTime,progressPercentage);
+}
+
+void taskCallBack(void* arg) {
+    char* parmas = (char*) arg;
+    cout << "thread "<< pthread_self() << " 正在执行，执行的参数 = " << parmas << endl;
+    sleep(1);
+}
+void taskCallBack2(void* arg) {
+    char* parmas = (char*) arg;
+    cout << "thread "<< pthread_self() << " 正在执行，执行的参数 = " << parmas << endl;
+    sleep(10);
+}
+
+void taskCallBack3(void* arg) {
+    char* parmas = (char*) arg;
+    cout << "thread "<< pthread_self() << " 正在执行，执行的参数 = " << parmas << endl;
+    sleep(2);
+}
+
+void taskCallBack4(void* arg) {
+    char* parmas = (char*) arg;
+    cout << "thread "<< pthread_self() << " 正在执行，执行的参数 = " << parmas << endl;
+    sleep(15);
+}
+
+void testThread() {
+    ThreadPool* threadPool = new ThreadPool(1,3);
+    Task task;
+    task.arg = (void*)"test task---0";
+    task.function = taskCallBack;
+    threadPool->addTask(task);
+
+
+    Task task1;
+    task1.arg = (void *) "test task---1";
+    task1.function = taskCallBack2;
+    threadPool->addTask(task1);
+
+
+    Task task2;
+    task2.arg = (void *) "test task---2";
+    task2.function = taskCallBack3;
+    threadPool->addTask(task2);
+
+    Task task3;
+    task3.arg = (void *) "test task---3";
+    task3.function = taskCallBack4;
+    threadPool->addTask(task3);
+
+    sleep(20);
+
+
+    delete threadPool;
+    threadPool = nullptr;
+
+}
+
+void* runnable(void* arg) {
+    printf("248--------\n");
+}
+
+int main() {
+    testThread();
+//    pthread_t thread;
+//    int result = pthread_create(&thread, nullptr,runnable, nullptr);
+//    sleep(1);
+//    printf("255---------thread_create result = %d\n",result);
+
+    const char *filePath = "../prog_index.m3u8";
+//    ifstream file;
+//    file.open(filePath,ios::in);
+//    if(!file.is_open()) {
+//        printf("190-----文件打开失败\n");
+//        return 0;
+//    }
+//    string strLine;
+//    while(getline(file,strLine)){
+//        if(strLine.empty()) {
+//            break;
+//        }
+//
+//        printf("197----- str = %s\n",strLine.c_str());
+//    }
+
+//    M3U8* m3U8 = new M3U8();
+//
+//    M3U8Parse* m3U8Parse = new M3U8Parse();
+//    m3U8Parse->parse(*filePath,&m3U8);
+//
+//    const char *local_m3u8_file = "../local.m3u8";
+//    m3U8Parse->createLocalM3U8File(local_m3u8_file,*m3U8);
+//    delete m3U8;
+//    char buf[9];
+//    sprintf(buf, "%f", 9.976670);//这句是将浮点数转换为字符串
+//    printf("parse done = %s  sizeof (char*) = %lu\n",buf,sizeof (local_m3u8_file));
+
+
 
    
 
@@ -263,9 +330,12 @@ int main() {
 
     //getDownloadFileInfo(dl_get_url);
 
-    char* mp4 = "https://static-dev.nio.com/dc-operation/2022/11/16/g5sX1zY2BcfjORwH.mp4";
-    FileDownload* fileDownload = new FileDownload();
-    fileDownload->downLoad(mp4,"../test.mp4", nullptr, progress_listener);
+//    char* mp4 = "https://static-dev.nio.com/dc-operation/2022/11/16/g5sX1zY2BcfjORwH.mp4";
+//    FileDownload* fileDownload = new FileDownload();
+//    fileDownload->downLoad(mp4,"../test.mp4", nullptr, progress_listener);
+
+
+
 
     return 0;
 }

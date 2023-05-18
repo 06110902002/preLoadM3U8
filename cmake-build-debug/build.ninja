@@ -74,6 +74,20 @@ build CMakeFiles/m3u8.dir/downloader/FileDownload.cpp.o: CXX_COMPILER__m3u8_Debu
   OBJECT_DIR = CMakeFiles/m3u8.dir
   OBJECT_FILE_DIR = CMakeFiles/m3u8.dir/downloader
 
+build CMakeFiles/m3u8.dir/threadpool/TaskQueue.cpp.o: CXX_COMPILER__m3u8_Debug /Users/rambo.liu/Documents/Demo/CPP_DEMO/m3u8/threadpool/TaskQueue.cpp || cmake_object_order_depends_target_m3u8
+  DEP_FILE = CMakeFiles/m3u8.dir/threadpool/TaskQueue.cpp.o.d
+  FLAGS = -g -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX12.3.sdk -std=gnu++14
+  INCLUDES = -I/opt/homebrew/opt/openssl@3/include -I/Users/rambo.liu/Documents/Demo/CPP_DEMO/m3u8/opt/homebrew/opt/curl/include
+  OBJECT_DIR = CMakeFiles/m3u8.dir
+  OBJECT_FILE_DIR = CMakeFiles/m3u8.dir/threadpool
+
+build CMakeFiles/m3u8.dir/threadpool/ThreadPool.cpp.o: CXX_COMPILER__m3u8_Debug /Users/rambo.liu/Documents/Demo/CPP_DEMO/m3u8/threadpool/ThreadPool.cpp || cmake_object_order_depends_target_m3u8
+  DEP_FILE = CMakeFiles/m3u8.dir/threadpool/ThreadPool.cpp.o.d
+  FLAGS = -g -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX12.3.sdk -std=gnu++14
+  INCLUDES = -I/opt/homebrew/opt/openssl@3/include -I/Users/rambo.liu/Documents/Demo/CPP_DEMO/m3u8/opt/homebrew/opt/curl/include
+  OBJECT_DIR = CMakeFiles/m3u8.dir
+  OBJECT_FILE_DIR = CMakeFiles/m3u8.dir/threadpool
+
 
 # =============================================================================
 # Link build statements for EXECUTABLE target m3u8
@@ -82,7 +96,7 @@ build CMakeFiles/m3u8.dir/downloader/FileDownload.cpp.o: CXX_COMPILER__m3u8_Debu
 #############################################
 # Link the executable m3u8
 
-build m3u8: CXX_EXECUTABLE_LINKER__m3u8_Debug CMakeFiles/m3u8.dir/main.cpp.o CMakeFiles/m3u8.dir/parse/M3U8Parse.cpp.o CMakeFiles/m3u8.dir/data/VideoCacheInfo.cpp.o CMakeFiles/m3u8.dir/downloader/FileDownload.cpp.o
+build m3u8: CXX_EXECUTABLE_LINKER__m3u8_Debug CMakeFiles/m3u8.dir/main.cpp.o CMakeFiles/m3u8.dir/parse/M3U8Parse.cpp.o CMakeFiles/m3u8.dir/data/VideoCacheInfo.cpp.o CMakeFiles/m3u8.dir/downloader/FileDownload.cpp.o CMakeFiles/m3u8.dir/threadpool/TaskQueue.cpp.o CMakeFiles/m3u8.dir/threadpool/ThreadPool.cpp.o
   FLAGS = -g -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX12.3.sdk
   LINK_LIBRARIES = -Wl,-rpath,/opt/homebrew/opt/openssl@3/lib -Wl,-rpath,/Users/rambo.liu/Documents/Demo/CPP_DEMO/m3u8/opt/homebrew/opt/curl/lib  -lssl  -lcrypto  -lcurl
   LINK_PATH = -L/opt/homebrew/opt/openssl@3/lib   -L/Users/rambo.liu/Documents/Demo/CPP_DEMO/m3u8/opt/homebrew/opt/curl/lib

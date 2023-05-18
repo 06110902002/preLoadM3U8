@@ -32,4 +32,4 @@ add_executable(m3u8 main.cpp
         data/VideoCacheInfo.h
         md5/md5.h
         downloader/FileDownload.cpp
-        downloader/FileDownload.h)
+        downloader/FileDownload.h queue/SafeQueue.h threadpool/TaskQueue.cpp threadpool/TaskQueue.h threadpool/ThreadPool.cpp threadpool/ThreadPool.h)
