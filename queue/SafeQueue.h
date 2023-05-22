@@ -52,6 +52,16 @@ public:
         m_queue.pop();
         return true;
     }
+    void clear() {
+        std::unique_lock<std::mutex> lock(m_mutex);
+        int size = m_queue.size();
+        while(!m_queue.empty()) {
+            T value = m_queue.front();
+            delete value;
+            value = nullptr;
+            m_queue.pop();
+        }
+    }
 };
 
 

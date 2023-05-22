@@ -39,22 +39,15 @@ ThreadPool::ThreadPool(int minNum, int maxNum) {
 }
 
 ThreadPool::~ThreadPool() {
-    m_shutdown = 1;
-    for (int i = 0; i < m_aliveNum; ++i) {
-        pthread_cond_signal(&m_notEmpty);
-    }
-    pthread_join(m_managerID, nullptr);
-    if (m_taskQ) delete m_taskQ;
-    if (m_threadIDs) delete[]m_threadIDs;
-    pthread_mutex_destroy(&m_lock);
-    pthread_cond_destroy(&m_notEmpty);
-    cout << "~ThreadPool 线程池销毁" << endl;
+    shutDown();
+    cout << "ThreadPool 线程池析构" << endl;
 }
 
-void ThreadPool::addTask(Task task) {
+void ThreadPool::addTask(Task& task) {
     if (m_shutdown) {
         return;
     }
+    cout<<"ThreadPool::addTask 添加任务 "<< &task <<endl;
     m_taskQ->addTask(task);
     pthread_cond_signal(&m_notEmpty);
 }
@@ -110,7 +103,7 @@ void *ThreadPool::worker(void *arg) {
         pool->m_busyNum++;
         pthread_mutex_unlock(&pool->m_lock);
         // 执行任务
-        cout << "thread " << pthread_self() << " start working..." << endl;
+        cout << "thread " << pthread_self() << " task = "<< &task <<" start working..." << endl;
         task.function(task.arg);
         /**
          * 注意如果是堆内存可以在此处删除，是栈内存无需删除
@@ -194,5 +187,18 @@ void ThreadPool::threadExit() {
         }
     }
     pthread_exit(nullptr);
+}
+
+void ThreadPool::shutDown() {
+    m_shutdown = 1;
+    for (int i = 0; i < m_aliveNum; ++i) {
+        pthread_cond_signal(&m_notEmpty);
+    }
+    pthread_join(m_managerID, nullptr);
+    if (m_taskQ) delete m_taskQ;
+    if (m_threadIDs) delete[]m_threadIDs;
+    pthread_mutex_destroy(&m_lock);
+    pthread_cond_destroy(&m_notEmpty);
+    cout << "ThreadPool 线程池销毁" << endl;
 }
 

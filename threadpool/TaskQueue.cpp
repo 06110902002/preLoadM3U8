@@ -16,7 +16,7 @@ TaskQueue::~TaskQueue() {
 }
 
 void TaskQueue::addTask(Task &task) {
-    std::cout<< "添加任务"<<std::endl;
+    std::cout<< "TaskQueue::addTask 添加任务 "<< &task <<std::endl;
     pthread_mutex_lock(&m_mutex);
     m_queue.push(task);
     m_taskCount ++;
@@ -35,6 +35,7 @@ void TaskQueue::addTask(callback func, void *arg) {
 
 Task TaskQueue::takeTask() {
     Task t;
+    std::cout<<"Task TaskQueue::takeTask() " << &t <<std::endl;
     pthread_mutex_lock(&m_mutex);
     if (!m_queue.empty()) {
         t = m_queue.front();

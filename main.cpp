@@ -10,6 +10,7 @@
 #include "downloader/FileDownload.h"
 #include "queue/SafeQueue.h"
 #include "threadpool/ThreadPool.h"
+#include "utils/Log.hpp"
 
 using namespace std;
 
@@ -274,8 +275,44 @@ void* runnable(void* arg) {
     printf("248--------\n");
 }
 
+/**
+ * 测试 openssl 的md5 使用
+ *
+ * @param src
+ * @return
+ */
+string test_MD5(const string &src) {
+    MD5_CTX ctx;
+
+    string md5_string;
+    unsigned char md[16] = {0};
+    char tmp[33] = {0};
+
+    MD5_Init(&ctx);
+    MD5_Update(&ctx, src.c_str(), src.size());
+    MD5_Final(md, &ctx);
+
+    for (int i = 0; i < 16; ++i) {
+        memset(tmp, 0x00, sizeof(tmp));
+        sprintf(tmp, "%02X", md[i]);
+        md5_string += tmp;
+    }
+    return md5_string;
+}
+
+void ServerAcceptListener(int clientId, const char *msg) {
+    printf("304------- clientId= %d  msg = %s\n",clientId,msg);
+}
+
+void clientConnectListener(int error, const char *msg) {
+    printf("309--------error = %d  msg = %s\n",error,msg);
+}
+
+
+
 int main() {
-    testThread();
+    //testThread();
+    LOG("343434");
 //    pthread_t thread;
 //    int result = pthread_create(&thread, nullptr,runnable, nullptr);
 //    sleep(1);
@@ -333,8 +370,6 @@ int main() {
 //    char* mp4 = "https://static-dev.nio.com/dc-operation/2022/11/16/g5sX1zY2BcfjORwH.mp4";
 //    FileDownload* fileDownload = new FileDownload();
 //    fileDownload->downLoad(mp4,"../test.mp4", nullptr, progress_listener);
-
-
 
 
     return 0;

@@ -14,7 +14,7 @@ public:
 
     ~ThreadPool();
 
-    void addTask(Task task);
+    void addTask(Task& task);
 
     /**
      * 获取忙线程的个数 正在工作的线程
@@ -27,6 +27,11 @@ public:
      * @return
      */
     int getAliveNumber();
+
+    /**
+     * 关闭线程池
+     */
+    void shutDown();
 
 private:
     /**

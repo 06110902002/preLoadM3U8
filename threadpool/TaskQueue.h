@@ -17,17 +17,30 @@ using callback = void (*)(void *);
 
 struct Task {
     Task() {
+        std::cout << "Task 构造 " << this << std::endl;
         function = nullptr;
         arg = nullptr;
+    }
+    ~Task() {
+        std::cout << "Task 析构 " << this << std::endl;
+    }
+    /**
+     * 拷贝构造函数
+     *
+     * @param task
+     */
+    Task(const Task& task) {
+        function = task.function;
+        arg = task.arg;
+        std::cout << "Task 拷贝构造 " << this << std::endl;
     }
 
     Task(callback f, void *arg) {
         function = f;
         this->arg = arg;
     }
-
-    callback function;
-    void *arg;  //回调待执行的参数
+    callback function{};
+    void *arg{};  //回调待执行的参数
 };
 
 /**
