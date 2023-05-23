@@ -38,4 +38,8 @@ add_executable(m3u8 main.cpp
         threadpool/TaskQueue.h
         threadpool/ThreadPool.cpp
         threadpool/ThreadPool.h
-        proxy/HttpServer.hpp utils/Log.hpp proxy/TcpServer.hpp)
+        utils/Log.hpp
+        utils/Util.hpp
+        proxy/HttpServer.hpp
+        proxy/TcpServer.hpp
+        proxy/Protocol.hpp)

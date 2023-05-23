@@ -10,9 +10,9 @@
 #include "downloader/FileDownload.h"
 #include "queue/SafeQueue.h"
 #include "threadpool/ThreadPool.h"
-#include "utils/Log.hpp"
+#include "proxy/HttpServer.hpp"
 
-using namespace std;
+//using namespace std;
 
 
 //下载文件数据接收函数
@@ -86,23 +86,23 @@ CURLcode dl_curl_get_req(const std::string &url, std::string filename)
 
 size_t header_callback(void *buffer, size_t size, size_t nitems, void *userdata)
 {
-    string sHeaderData = (char*)buffer;
-    string sKey = "Content-Disposition";
+    std::string sHeaderData = (char*)buffer;
+    std::string sKey = "Content-Disposition";
     std::size_t nFound = sHeaderData.find(sKey);
     if (nFound != std::string::npos)
     {
         printf("Header data: %s \n", (char*)buffer);
-        stringstream ss(sHeaderData);
+        std::stringstream ss(sHeaderData);
         char cSplit = ';'; // 设定好分隔符号
         sKey = "filename=";
-        vector<string> results; // 用来存储结果
-        string strResult;
+        std::vector<std::string> results; // 用来存储结果
+        std::string strResult;
         while (getline(ss, strResult, cSplit))
         {
             nFound = strResult.find(sKey);
             if (nFound != std::string::npos)
             {
-                string sFileName = strResult.substr(nFound + sKey.length());
+                std::string sFileName = strResult.substr(nFound + sKey.length());
                 sKey = '"';
                 nFound = sFileName.find(sKey);
                 if (nFound != std::string::npos)
@@ -119,7 +119,7 @@ size_t header_callback(void *buffer, size_t size, size_t nitems, void *userdata)
     return nitems * size;
 }
 
-double getDownloadFileInfo(const string url)
+double getDownloadFileInfo(const std::string url)
 {
     CURL *easy_handle = NULL;
     int ret = CURLE_OK;
@@ -218,24 +218,24 @@ void progress_listener (void *userdata, double downloadSpeed,double remainingTim
 
 void taskCallBack(void* arg) {
     char* parmas = (char*) arg;
-    cout << "thread "<< pthread_self() << " 正在执行，执行的参数 = " << parmas << endl;
+    std::cout << "thread "<< pthread_self() << " 正在执行，执行的参数 = " << parmas << std::endl;
     sleep(1);
 }
 void taskCallBack2(void* arg) {
     char* parmas = (char*) arg;
-    cout << "thread "<< pthread_self() << " 正在执行，执行的参数 = " << parmas << endl;
+    std::cout << "thread "<< pthread_self() << " 正在执行，执行的参数 = " << parmas << std::endl;
     sleep(10);
 }
 
 void taskCallBack3(void* arg) {
     char* parmas = (char*) arg;
-    cout << "thread "<< pthread_self() << " 正在执行，执行的参数 = " << parmas << endl;
+    std::cout << "thread "<< pthread_self() << " 正在执行，执行的参数 = " << parmas << std::endl;
     sleep(2);
 }
 
 void taskCallBack4(void* arg) {
     char* parmas = (char*) arg;
-    cout << "thread "<< pthread_self() << " 正在执行，执行的参数 = " << parmas << endl;
+    std::cout << "thread "<< pthread_self() << " 正在执行，执行的参数 = " << parmas << std::endl;
     sleep(15);
 }
 
@@ -281,10 +281,10 @@ void* runnable(void* arg) {
  * @param src
  * @return
  */
-string test_MD5(const string &src) {
+std::string test_MD5(const std::string &src) {
     MD5_CTX ctx;
 
-    string md5_string;
+    std::string md5_string;
     unsigned char md[16] = {0};
     char tmp[33] = {0};
 
@@ -300,19 +300,23 @@ string test_MD5(const string &src) {
     return md5_string;
 }
 
-void ServerAcceptListener(int clientId, const char *msg) {
-    printf("304------- clientId= %d  msg = %s\n",clientId,msg);
-}
+/**
+ * 测试 本地服务器
+ * 客户端的请求 类似为：http://127.0.0.1:12580/test=123&userId=2226
+ */
+void testHttpServer() {
+    std::shared_ptr<HttpServer> svr(new HttpServer(12580));
+    svr->InitServer();
+    svr->Loop();
 
-void clientConnectListener(int error, const char *msg) {
-    printf("309--------error = %d  msg = %s\n",error,msg);
 }
 
 
 
 int main() {
     //testThread();
-    LOG("343434");
+    testHttpServer();
+
 //    pthread_t thread;
 //    int result = pthread_create(&thread, nullptr,runnable, nullptr);
 //    sleep(1);

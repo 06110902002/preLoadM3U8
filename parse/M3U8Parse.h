@@ -37,7 +37,7 @@
 
 
 
-using namespace std;
+//using namespace std;
 
 typedef struct M3U8Seg {
     char *mParentUrl;             //分片的上级M3U8的url
@@ -70,7 +70,7 @@ typedef struct M3U8 {
     int mSequence = 0;           //序列起始值
     int mVersion = 3;            //版本号
     bool mIsLive;                //是否是直播
-    list<M3U8Seg*> mSegList;      //分片seg 列表
+    std::list<M3U8Seg*> mSegList;      //分片seg 列表
 
 } M3U8;
 
@@ -91,7 +91,7 @@ public:
      */
     void parse(const char &m3u8Url, M3U8 **m3u8);
 
-    string regNumFromStr(string str,const char* p);
+    std::string regNumFromStr(std::string str,const char* p);
 
     /**
      * 创建本地m3u8 索引文件

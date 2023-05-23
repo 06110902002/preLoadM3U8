@@ -5,7 +5,7 @@
 #include <unistd.h>
 #include "ThreadPool.h"
 
-using namespace std;
+//using namespace std;
 
 ThreadPool::ThreadPool(int minNum, int maxNum) {
     m_taskQ = new TaskQueue;
@@ -17,20 +17,20 @@ ThreadPool::ThreadPool(int minNum, int maxNum) {
 
         m_threadIDs = new pthread_t[maxNum];
         if (m_threadIDs == nullptr) {
-            cout << "malloc thread_t[] 失败...." << endl;;
+            std::cout << "malloc thread_t[] 失败...." << std::endl;;
             break;
         }
         memset(m_threadIDs, 0, sizeof(pthread_t) * maxNum);
         if (pthread_mutex_init(&m_lock, NULL) != 0 ||
             pthread_cond_init(&m_notEmpty, NULL) != 0) {
-            cout << "init mutex or condition fail..." << endl;
+            std::cout << "init mutex or condition fail..." << std::endl;
             break;
         }
 
         // 根据最小线程个数, 创建任务线程
         for (int i = 0; i < minNum; ++i) {
             pthread_create(&m_threadIDs[i], nullptr, worker, this);
-            cout << "创建子线程, ID: " << m_threadIDs[i] << endl;
+            std::cout << "创建子线程, ID: " << m_threadIDs[i] << std::endl;
         }
         // 创建管理者线程, 1个
         pthread_create(&m_managerID, nullptr, manager, this);
@@ -40,14 +40,14 @@ ThreadPool::ThreadPool(int minNum, int maxNum) {
 
 ThreadPool::~ThreadPool() {
     shutDown();
-    cout << "ThreadPool 线程池析构" << endl;
+    std::cout << "ThreadPool 线程池析构" << std::endl;
 }
 
 void ThreadPool::addTask(Task& task) {
     if (m_shutdown) {
         return;
     }
-    cout<<"ThreadPool::addTask 添加任务 "<< &task <<endl;
+    std::cout<<"ThreadPool::addTask 添加任务 "<< &task <<std::endl;
     m_taskQ->addTask(task);
     pthread_cond_signal(&m_notEmpty);
 }
@@ -76,9 +76,9 @@ void *ThreadPool::worker(void *arg) {
         // 访问任务队列(共享资源)加锁
         pthread_mutex_lock(&pool->m_lock);
         // 判断任务队列是否为空, 如果为空工作线程阻塞
-        cout << "当前任务个数 = " << pool->m_taskQ->taskNumber() << endl;
+        std::cout << "当前任务个数 = " << pool->m_taskQ->taskNumber() << std::endl;
         while (pool->m_taskQ->taskNumber() == 0 && !pool->m_shutdown) {
-            cout << "thread " << pthread_self() << " waiting..." << endl;
+            std::cout << "thread " << pthread_self() << " waiting..." << std::endl;
             // 阻塞线程
             pthread_cond_wait(&pool->m_notEmpty, &pool->m_lock);
 
@@ -97,13 +97,13 @@ void *ThreadPool::worker(void *arg) {
             pthread_mutex_unlock(&pool->m_lock);
             pool->threadExit();
         }
-        cout << "thread " << pthread_self() << " 被唤醒..." << endl;
+        std::cout << "thread " << pthread_self() << " 被唤醒..." << std::endl;
         // 从任务队列中取出一个任务
         Task task = pool->m_taskQ->takeTask();
         pool->m_busyNum++;
         pthread_mutex_unlock(&pool->m_lock);
         // 执行任务
-        cout << "thread " << pthread_self() << " task = "<< &task <<" start working..." << endl;
+        std::cout << "thread " << pthread_self() << " task = "<< &task <<" start working..." << std::endl;
         task.function(task.arg);
         /**
          * 注意如果是堆内存可以在此处删除，是栈内存无需删除
@@ -111,7 +111,7 @@ void *ThreadPool::worker(void *arg) {
 //        delete task.arg;
 //        task.arg = nullptr;
 
-        cout << "thread " << pthread_self() << " end working..." << endl;
+        std::cout << "thread " << pthread_self() << " end working..." << std::endl;
         pthread_mutex_lock(&pool->m_lock);
         pool->m_busyNum--;
         pthread_mutex_unlock(&pool->m_lock);
@@ -135,10 +135,10 @@ void *ThreadPool::manager(void *arg) {
         int liveNum = pool->m_aliveNum;
         int busyNum = pool->m_busyNum;
         pthread_mutex_unlock(&pool->m_lock);
-        cout << "管理线程开始工作：任务数 " << queueSize << " 活着的线程数 "<< liveNum << " busy " << busyNum << endl;
+        std::cout << "管理线程开始工作：任务数 " << queueSize << " 活着的线程数 "<< liveNum << " busy " << busyNum << std::endl;
         for (int i = 0; i < liveNum; i ++) {
             if (pool->m_threadIDs[i] != 0) {
-                cout<<"活着的线程 id = "<< pool->m_threadIDs[i] << endl;
+                std::cout<<"活着的线程 id = "<< pool->m_threadIDs[i] << std::endl;
             }
         }
         // 创建线程
@@ -148,14 +148,14 @@ void *ThreadPool::manager(void *arg) {
             // 线程池加锁
             pthread_mutex_lock(&pool->m_lock);
             int num = 0;
-            cout << "任务数大于活着的线程数据，表现线程过小，人力资源不够，需要增派人手 管理将创建线程"<<endl;
+            std::cout << "任务数大于活着的线程数据，表现线程过小，人力资源不够，需要增派人手 管理将创建线程"<<std::endl;
             for (int i = 0; i < pool->m_maxNum && num < NUMBER
                             && pool->m_aliveNum < pool->m_maxNum; ++i) {
                 if (pool->m_threadIDs[i] == 0) {
                     pthread_create(&pool->m_threadIDs[i], NULL, worker, pool);
                     num++;
                     pool->m_aliveNum++;
-                    cout << "管理线程临时 创建子线程, ID: " << pool->m_threadIDs[i] << endl;
+                    std::cout << "管理线程临时 创建子线程, ID: " << pool->m_threadIDs[i] << std::endl;
                 }
             }
             pthread_mutex_unlock(&pool->m_lock);
@@ -164,7 +164,7 @@ void *ThreadPool::manager(void *arg) {
         // 销毁多余的线程
         // 忙线程*2 < 存活的线程数目 && 存活的线程数 > 最小线程数量
         if (busyNum * 2 < liveNum && liveNum > pool->m_minNum) {
-            cout << "有空闲线程 需要销毁" << endl;
+            std::cout << "有空闲线程 需要销毁" << std::endl;
             pthread_mutex_lock(&pool->m_lock);
             pool->m_exitNum = NUMBER;
             pthread_mutex_unlock(&pool->m_lock);
@@ -173,7 +173,7 @@ void *ThreadPool::manager(void *arg) {
             }
         }
     }
-    cout<<"管理者线程销毁"<<endl;
+    std::cout<<"管理者线程销毁"<<std::endl;
     return nullptr;
 }
 
@@ -181,7 +181,7 @@ void ThreadPool::threadExit() {
     pthread_t tid = pthread_self();
     for (int i = 0; i < m_maxNum; ++i) {
         if (m_threadIDs[i] == tid) {
-            cout << "threadExit() function: thread "<< pthread_self() << " exiting..." << endl;
+            std::cout << "threadExit() function: thread "<< pthread_self() << " exiting..." << std::endl;
             m_threadIDs[i] = 0;
             break;
         }
@@ -199,6 +199,6 @@ void ThreadPool::shutDown() {
     if (m_threadIDs) delete[]m_threadIDs;
     pthread_mutex_destroy(&m_lock);
     pthread_cond_destroy(&m_notEmpty);
-    cout << "ThreadPool 线程池销毁" << endl;
+    std::cout << "ThreadPool 线程池销毁" << std::endl;
 }
 

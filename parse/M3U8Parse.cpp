@@ -29,8 +29,8 @@ M3U8Parse::~M3U8Parse() {
 
 void M3U8Parse::parse(const char &m3u8Url, M3U8 **m3u8) {
 
-    ifstream file;
-    file.open(&m3u8Url,ios::in);
+    std::ifstream file;
+    file.open(&m3u8Url,std::ios::in);
     if(!file.is_open()) {
         printf("190-----文件打开失败\n");
         return;
@@ -52,24 +52,24 @@ void M3U8Parse::parse(const char &m3u8Url, M3U8 **m3u8) {
     char* initSegmentUri;
     char* parentUrl = "http://devimages.apple.com.edgekey.net/streaming/examples/bipbop_4x3/gear1/";
 
-    string strLine;
+    std::string strLine;
     while(getline(file,strLine)){
         if(strLine.empty()) {
             continue;
         }
         if (strLine.rfind(TAG_PREFIX, 0) == 0) {
             if (strLine.rfind(TAG_MEDIA_DURATION, 0) == 0) {
-                string duration = regNumFromStr(strLine,NUM_PATTERN);
+                std::string duration = regNumFromStr(strLine,NUM_PATTERN);
                 segDuration = strtod(duration.c_str(), nullptr);
                 printf("60---- duration = %s   segduration = %f\n",duration.c_str(),segDuration);
             } else if (strLine.rfind(TAG_TARGET_DURATION, 0) == 0) {
-                string targetDurationStr = regNumFromStr(strLine,NUM_PATTERN);
+                std::string targetDurationStr = regNumFromStr(strLine,NUM_PATTERN);
                 targetDuration = strtod(targetDurationStr.c_str(), nullptr);
             } else if (strLine.rfind(TAG_VERSION, 0) == 0) {
-                string verisonStr = regNumFromStr(strLine,NUM_PATTERN);
+                std::string verisonStr = regNumFromStr(strLine,NUM_PATTERN);
                 version = strtod(verisonStr.c_str(), nullptr);
             } else if (strLine.rfind(TAG_MEDIA_SEQUENCE, 0) == 0) {
-                string tmp = regNumFromStr(strLine,NUM_PATTERN);
+                std::string tmp = regNumFromStr(strLine,NUM_PATTERN);
                 sequence = strtod(tmp.c_str(), nullptr);
             } else if (strLine.rfind(TAG_STREAM_INF, 0) == 0) {
                 hasMasterList = true;
@@ -82,7 +82,7 @@ void M3U8Parse::parse(const char &m3u8Url, M3U8 **m3u8) {
                //加密处理
             } else if (strLine.rfind(TAG_INIT_SEGMENT, 0) == 0) {
                 hasInitSegment = true;
-                string tempInitSegmentUri = regNumFromStr(strLine,REGEX_URI);
+                std::string tempInitSegmentUri = regNumFromStr(strLine,REGEX_URI);
             }
             continue;
         }
@@ -122,13 +122,13 @@ void M3U8Parse::parse(const char &m3u8Url, M3U8 **m3u8) {
     }
 }
 
-string M3U8Parse::regNumFromStr(string str,const char* p) {
+std::string M3U8Parse::regNumFromStr(std::string str,const char* p) {
 
     //std::string str = "#EXTINF:9.97667,";
     std::regex pattern(p);
     std::sregex_iterator it(str.begin(), str.end(), pattern);
     std::sregex_iterator end;
-    string result;
+    std::string result;
     while (it != end) {
         //std::cout << it->str() << std::endl;
         result.append(it->str());
@@ -142,9 +142,9 @@ void M3U8Parse::createLocalM3U8File(const char* m3u8file, M3U8 &m3u8) {
         printf("140-----写入文件失败，请检查文件路径是否存在\n");
         return;
     }
-    fstream f;
+    std::fstream f;
     //追加写入,在原来基础上加了ios::app
-    f.open(m3u8file,ios::out|ios::app);
+    f.open(m3u8file,std::ios::out|std::ios::app);
     //输入你想写入的内容
 //    f<<"今天天气不错"<<endl;
 //    f<<"今天天气不错"<<endl;
@@ -172,7 +172,7 @@ void M3U8Parse::createLocalM3U8File(const char* m3u8file, M3U8 &m3u8) {
     f.write("\n",1);
 
     //写入单个片段 seg 信息
-    list<M3U8Seg*>::iterator it;
+    std::list<M3U8Seg*>::iterator it;
     for (it = m3u8.mSegList.begin(); it != m3u8.mSegList.end(); it++) {
         f.write(TAG_MEDIA_DURATION,sizeof(TAG_MEDIA_DURATION) - 1);
         f.write(":",1);
